@@ -6,20 +6,7 @@ The FPGA market-data pipeline used in electronic trading: 10GbE frames in, best 
 
 ## Pipeline
 
-```
-10GbE MAC user side (64b AXI-Stream @ 156.25 MHz)
-   │
-   ▼  itch_parser.sv
- Ethernet / IPv4 / UDP-port filter → MoldUDP64 → 128-byte realignment buffer
-   → length-prefixed ITCH messages popped byte-aligned, one per clock
-   │
-   ▼  order_book.sv
- order table (1024 entries, full 64-bit reference tag)
-   + per-instrument bid/ask books (16 sorted price levels each)
-   │   Add / Execute / Cancel / Delete / Replace, one book op per clock
-   ▼
- BBO update {instrument, side, price, size} whenever the top of a book changes
-```
+![Architecture](docs/diagrams/architecture.svg)
 
 - The realignment buffer presents every message byte-aligned no matter where it fell in the 64-bit beats
 - Price-level insert, update and remove are single-cycle, using a parallel compare-and-shift across all 16 levels
@@ -55,6 +42,12 @@ make test        # 40k messages, 0 % and 30 % input gaps
 make test N=8000 # quicker
 make lint
 ```
+
+## Test run
+
+Output of the CI command (`make test lint`), captured from a local run:
+
+![Test run](docs/screenshots/test_run.svg)
 
 ## Limitations / next steps
 
